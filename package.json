@@ -1,0 +1,33 @@
+{
+  "name": "creds-notflux",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Playing with VCs, Passkeys and shared subscriptions.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "fastify": "^4.18.0",
+    "@fastify/formbody": "^7.4.0",
+    "@fastify/static": "^6.10.2",
+    "btoa": "^1.2.1",
+    "node-fetch": "^3.3.1",
+    "@fastify/cookie": "^8.3.0",
+    "got": "^13.0.0"
+  },
+  "engines": {
+    "node": "16.x"
+  },
+  "repository": {
+    "url": "https://glitch.com/edit/#!/creds-notflux"
+  },
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "glitch",
+    "fastify",
+    "passkeys",
+    "credentials"
+  ]
+}
