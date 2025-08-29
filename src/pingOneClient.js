@@ -1,75 +1,65 @@
-import got from "got";
-import fetch from "node-fetch";
+// import got from "got"; // removed, using native fetch
 
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 // Obtains an "SDK token" that is passed into the widget to execute the flow policy.
 // The session token is passed in via 'global.sessionToken' to make it available to the flow.
-// exports.getSdkToken = async (sessionToken) => {
 export async function getSdkToken(sessionToken, policyId) {
-  const requestBody = {
+  const sdkTokenRequestBody = {
     policyId: policyId
   };
-  
   if (sessionToken) {
-    requestBody.global = { sessionToken };
+    sdkTokenRequestBody.global = { sessionToken };
   }
-  
-  //console.log("RequestBody :", requestBody)
-  const response = await got({
-    url: `${process.env.ORCHESTRATEAPIROOT}/v1/company/${process.env.envId}/sdktoken`,
-    method: 'post',
+  const sdkTokenUrl = `${process.env.ORCHESTRATEAPIROOT}/v1/company/${process.env.envId}/sdktoken`;
+  const sdkTokenResponse = await fetch(sdkTokenUrl, {
+    method: 'POST',
     headers: {
       "X-SK-API-KEY": process.env.dvApiKey,
       "Content-Type": "application/json"
     },
-    //body: JSON.stringify(requestBody)
-    json: requestBody
-  }).json()
-
-  //console.log(response)
-  return response.access_token
-} 
+    body: JSON.stringify(sdkTokenRequestBody)
+  });
+  const sdkTokenData = await sdkTokenResponse.json();
+  return sdkTokenData.access_token;
+}
 
 // Retrieves the session identified by the provided token.
 export async function getSession(sessionToken) {
-
-  const accessToken = await getWorkerToken();
-
-  const response = await got({
-    url: `${process.env.APIROOT}/v1/environments/${process.env.envId}/sessions/me`,
-    method: 'get',
+  const sessionAccessToken = await getWorkerToken();
+  const sessionUrl = `${process.env.APIROOT}/v1/environments/${process.env.envId}/sessions/me`;
+  const sessionResponse = await fetch(sessionUrl, {
+    method: 'GET',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${sessionAccessToken}`,
       'Cookie': `ST=${sessionToken}`
     }
-  }).json();
-  
-  //console.log("getSession Response: ", response)
-  
-  return response;
+  });
+  const sessionData = await sessionResponse.json();
+  return sessionData;
 }
 
 // Updates the session identified by the provided token.
 export async function updateSession(sessionToken, session) {
-  const accessToken = await getWorkerToken();
-  
-  const response = await got({
-    url: `${process.env.APIROOT}/v1/environments/${process.env.envId}/sessions/me`,
-    method: 'put',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Cookie': `ST=${sessionToken}`,
-      'content-type': 'application/json'
-    },
-    json: session
-  }).json()
-  .catch(err => console.log("updateSession Error: ", err.code))
-  
-  //console.log("updateSession: ", response)
-  
-  return response;
+  const updateAccessToken = await getWorkerToken();
+  const updateUrl = `${process.env.APIROOT}/v1/environments/${process.env.envId}/sessions/me`;
+  try {
+    const updateResponse = await fetch(updateUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${updateAccessToken}`,
+        'Cookie': `ST=${sessionToken}`,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(session)
+    });
+    const updateData = await updateResponse.json();
+    return updateData;
+  } catch (err) {
+    console.log("updateSession Error: ", err.code);
+    return null;
+  }
 }
 
 export async function createMfaDevice(userId, deviceBody, envDetails){

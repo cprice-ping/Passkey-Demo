@@ -9,7 +9,6 @@ import crypto from "crypto"
 
 // External libraries
 import Fastify from "fastify";
-import fetch from "node-fetch";
 
 // Initialize variables that are no longer available by default in Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -57,6 +56,7 @@ fastify.get("/.well-known/apple-app-site-association", async (req, reply) => {
 ************************/
 fastify.post("/registerPasskey", async (req, reply) => {
   
+  console.log("/registerPasskey request body:", req.body);
   const passkeyDevice = {
     "type": "FIDO2",
     "rp": {
@@ -64,9 +64,14 @@ fastify.post("/registerPasskey", async (req, reply) => {
         "name": "Passkey Demo"
     }
   }
-  
-  const registerResponse = await pingOneClient.createMfaDevice(req.body.userId, passkeyDevice, req.body.envDetails)
-  reply.send(registerResponse)
+  try {
+    const registerResponse = await pingOneClient.createMfaDevice(req.body.userId, passkeyDevice, req.body.envDetails);
+    console.log("/registerPasskey response:", registerResponse);
+    reply.send(registerResponse);
+  } catch (err) {
+    console.error("/registerPasskey error:", err);
+    reply.status(500).send({ error: err.message || err });
+  }
 })
 
 fastify.post("/activatePasskey", async (req, reply) => {
@@ -98,7 +103,7 @@ fastify.post("/validateAssertion", async (req, reply) => {
 
 // Run the server and report out to the logs
 fastify.listen(
-  { port: process.env.PORT, host: "0.0.0.0" },
+  { port: 5555, host: "0.0.0.0" },
   function (err, address) {
     if (err) {
       console.error(err);
