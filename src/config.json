@@ -1,0 +1,6 @@
+{
+  "authRoot": "https://auth.pingone.com",
+  "apiRoot": "https://api.pingone.com",
+  "orchestrateApiRoot": "https://orchestrate-api.pingone.com",
+  "serverCookie": true
+}
